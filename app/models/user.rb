@@ -1,10 +1,18 @@
 class User < ActiveRecord::Base
-
+#accessor
+  attr_accessor :group_key
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :trackable, :validatable, :confirmable
+         :recoverable, :rememberable, :trackable, :validatable, :confirmable,
          authentication_keys: [:email, :group_key]
+
+  # 以下を追記
+  has_attached_file :avatar, styles: { medium: "300x300>", thumb: "100x100>"}
+  validates_attachment_content_type :avatar, content_type: ["image/jpg","image/jpeg","image/png"]
+
+  # 省略
+
  #association
   belongs_to :group
 
@@ -27,6 +35,17 @@ class User < ActiveRecord::Base
       false
     end
   end
+  def name
+    "#{family_name} #{first_name}"
+  end
+
+  def name_kana
+    "#{family_name_kana} #{first_name_kana}"
+  end
+
+  def full_profile?
+    avatar? && family_name? && first_name? && family_name_kana? && first_name_kana?
+  end
 
   private
   def has_group_key?
@@ -38,4 +57,4 @@ class User < ActiveRecord::Base
     self.group_id = group.id
   end
 end
-end
+
